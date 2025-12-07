@@ -1,7 +1,22 @@
 {
   "name": "eslint-plugin-enforce-call",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "ESLint plugin to enforce function calls within specific function contexts",
+  "license": "MIT",
+  "publisher": "johnathanludwig",
+  "author": "Johnathan Ludwig <john@johnathan.dev> (https://johnathan.dev)",
+  "homepage": "https://github.com/johnathanludwig/eslint-plugin-enforce-call#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnathanludwig/eslint-plugin-enforce-call.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnathanludwig/eslint-plugin-enforce-call/issues"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
@@ -13,8 +28,6 @@
     "eslint-plugin",
     "enforce-call"
   ],
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
     "eslint": "^9.0.0"
   },
@@ -22,6 +35,6 @@
     "eslint": ">=9.0.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=20.0.0"
   }
 }
