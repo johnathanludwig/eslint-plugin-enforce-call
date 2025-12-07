@@ -1,0 +1,27 @@
+{
+  "name": "eslint-plugin-enforce-call",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce function calls within specific function contexts",
+  "type": "module",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "node tests/rules/require-call-in-context.test.js"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "enforce-call"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
