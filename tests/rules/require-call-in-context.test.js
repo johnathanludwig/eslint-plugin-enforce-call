@@ -1213,3 +1213,79 @@ exportedObjectTester.run("require-call-in-context (exported objects)", rule, {
     },
   ],
 });
+
+// Tests for TypeScript satisfies expression
+import tsParser from "@typescript-eslint/parser";
+
+const typescriptTester = new RuleTester({
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: "module",
+    parser: tsParser,
+  },
+});
+
+typescriptTester.run("require-call-in-context (typescript satisfies)", rule, {
+  valid: [
+    // TypeScript satisfies expression with enforced call
+    {
+      code: `export const load = (async () => { await hasPermission() }) satisfies LoadEvent`,
+      options: [
+        {
+          checkFunctions: ["load"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Object property with satisfies expression and enforced call
+    {
+      code: `export const actions = {
+        default: (async () => { await hasPermission() }) satisfies Action
+      }`,
+      options: [
+        {
+          checkFunctions: ["actions"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+  ],
+  invalid: [
+    // TypeScript satisfies expression without enforced call
+    {
+      code: `export const load = (async () => { console.log('test') }) satisfies LoadEvent`,
+      options: [
+        {
+          checkFunctions: ["load"],
+          enforce: ["hasPermission"],
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingAtLeastOne",
+          data: { functions: "hasPermission" },
+        },
+      ],
+    },
+
+    // Object property with satisfies expression without enforced call
+    {
+      code: `export const actions = {
+        default: (async () => { console.log('test') }) satisfies Action
+      }`,
+      options: [
+        {
+          checkFunctions: ["actions"],
+          enforce: ["hasPermission"],
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingAtLeastOne",
+          data: { functions: "hasPermission" },
+        },
+      ],
+    },
+  ],
+});
