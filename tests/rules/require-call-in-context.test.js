@@ -244,6 +244,72 @@ ruleTester.run("require-call-in-context", rule, {
         },
       ],
     },
+
+    // Enforced call inside try block
+    {
+      code: "query(() => { try { hasPermission() } catch (e) {} })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Enforced call inside if block
+    {
+      code: "query(() => { if (condition) { hasPermission() } })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Enforced call inside if-else block
+    {
+      code: "query(() => { if (condition) { foo() } else { hasPermission() } })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Enforced call inside nested blocks
+    {
+      code: "query(() => { try { if (condition) { hasPermission() } } catch (e) {} })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Enforced call inside for loop
+    {
+      code: "query(() => { for (let i = 0; i < 10; i++) { hasPermission() } })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+
+    // Enforced call inside while loop
+    {
+      code: "query(() => { while (true) { hasPermission() } })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
   ],
   invalid: [
     // Non-empty callback without enforced call
