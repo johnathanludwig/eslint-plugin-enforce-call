@@ -1,6 +1,6 @@
 # eslint-plugin-enforce-call
 
-> [!NOTE] 
+> [!NOTE]
 > This plugin was built using AI however everything has been tested and verified manually.
 
 ESLint plugin to enforce specific function calls within callback arguments of designated context functions.
@@ -16,22 +16,25 @@ pnpm add -D eslint-plugin-enforce-call
 ### ESLint Flat Config (ESLint 9+)
 
 ```javascript
-import enforceCall from 'eslint-plugin-enforce-call'
+import enforceCall from "eslint-plugin-enforce-call";
 
 export default [
   {
     plugins: {
-      'enforce-call': enforceCall
+      "enforce-call": enforceCall,
     },
     rules: {
-      'enforce-call/require-call-in-context': ['error', {
-        check: ['query', 'query.batch', 'command'],
-        enforce: ['hasPermission', 'isAuthenticated'],
-        requireAll: false
-      }]
-    }
-  }
-]
+      "enforce-call/require-call-in-context": [
+        "error",
+        {
+          check: ["query", "query.batch", "command"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: false,
+        },
+      ],
+    },
+  },
+];
 ```
 
 ## Rule: require-call-in-context
@@ -42,10 +45,15 @@ Enforces that specific functions are called within callback arguments of designa
 
 - `check` (array of strings, optional): Function names to monitor for callback arguments
 - `checkFunctions` (array of strings, optional): Exported function names to check directly
-- `enforce` (array of strings, required): Function names that must be called within those callbacks/functions  
+- `enforce` (array of strings, required): Function names that must be called within those callbacks/functions
 - `requireAll` (boolean, optional, default: `false`):
   - `false`: At least one enforced function must be called
   - `true`: All enforced functions must be called
+- `requireFirst` (boolean, optional, default: `false`):
+  - `false`: Enforced calls may appear anywhere in the function
+  - `true`: The first executable statement in a non-empty function must call an enforced function
+
+When `requireAll` and `requireFirst` are both `true`, every enforced call must be present and at least one must be the first executable statement. Expression-bodied callbacks are treated as their first expression.
 
 At least one of `check` or `checkFunctions` should be provided.
 
@@ -56,24 +64,24 @@ At least one of `check` or `checkFunctions` should be provided.
 ```javascript
 // Callback with enforced call
 query(() => {
-  hasPermission()
-})
+  hasPermission();
+});
 
 // Member expression context
 query.batch(() => {
-  isAuthenticated()
-})
+  isAuthenticated();
+});
 
 // Multiple arguments
 query(z.string(), () => {
-  hasPermission('read')
-})
+  hasPermission("read");
+});
 
 // Empty callbacks are allowed
-query(() => {})
+query(() => {});
 
 // Expression-body arrow function
-query(() => hasPermission())
+query(() => hasPermission());
 ```
 
 #### Invalid ✗
@@ -81,28 +89,28 @@ query(() => hasPermission())
 ```javascript
 // No enforced call
 query(() => {
-  console.log('test')
-})
+  console.log("test");
+});
 
 // Wrong function called
 query.batch(() => {
-  foo()
-})
+  foo();
+});
 
 // Code present but no enforced call
 query(z.string(), () => {
-  const num = 2 + 2
-})
+  const num = 2 + 2;
+});
 
 // Commented out doesn't count
 query(() => {
   // hasPermission()
-})
+});
 
 // Function reference without invocation
 query(() => {
-  hasPermission
-})
+  hasPermission;
+});
 ```
 
 ### Checking Exported Functions
@@ -114,16 +122,19 @@ Use `checkFunctions` to enforce calls within exported named functions (useful fo
 export default [
   {
     plugins: {
-      'enforce-call': enforceCall
+      "enforce-call": enforceCall,
     },
     rules: {
-      'enforce-call/require-call-in-context': ['error', {
-        checkFunctions: ['load'],
-        enforce: ['hasPermission']
-      }]
-    }
-  }
-]
+      "enforce-call/require-call-in-context": [
+        "error",
+        {
+          checkFunctions: ["load"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+  },
+];
 ```
 
 #### Valid ✓
@@ -131,32 +142,32 @@ export default [
 ```javascript
 // Exported function with enforced call
 export const load = () => {
-  hasPermission()
-}
+  hasPermission();
+};
 
 // Function declaration
 export function load() {
-  hasPermission()
+  hasPermission();
 }
 
 // Async function
 export const load = async () => {
-  await hasPermission()
-}
+  await hasPermission();
+};
 
 // Namespace imports work too
-import * as permissions from 'permissions'
+import * as permissions from "permissions";
 export const load = () => {
-  permissions.hasPermission()
-}
+  permissions.hasPermission();
+};
 
 // Empty functions are allowed
-export const load = () => {}
+export const load = () => {};
 
 // Non-exported functions are not checked
 const load = () => {
-  console.log('not checked')
-}
+  console.log("not checked");
+};
 ```
 
 #### Invalid ✗
@@ -164,12 +175,12 @@ const load = () => {
 ```javascript
 // No enforced call
 export const load = () => {
-  console.log('test')
-}
+  console.log("test");
+};
 
 // Missing enforced call
 export function load() {
-  fetchData()
+  fetchData();
 }
 ```
 
@@ -182,16 +193,19 @@ When `checkFunctions` matches an exported object, all function properties within
 export default [
   {
     plugins: {
-      'enforce-call': enforceCall
+      "enforce-call": enforceCall,
     },
     rules: {
-      'enforce-call/require-call-in-context': ['error', {
-        checkFunctions: ['actions'],
-        enforce: ['hasPermission']
-      }]
-    }
-  }
-]
+      "enforce-call/require-call-in-context": [
+        "error",
+        {
+          checkFunctions: ["actions"],
+          enforce: ["hasPermission"],
+        },
+      ],
+    },
+  },
+];
 ```
 
 #### Valid ✓
@@ -200,32 +214,32 @@ export default [
 // All functions in the object have enforced calls
 export const actions = {
   default: async (event) => {
-    hasPermission()
+    hasPermission();
   },
   create: async () => {
-    hasPermission()
-  }
-}
+    hasPermission();
+  },
+};
 
 // Method shorthand syntax works too
 export const actions = {
   async default() {
-    hasPermission()
-  }
-}
+    hasPermission();
+  },
+};
 
 // Empty functions are allowed
 export const actions = {
-  default: async () => {}
-}
+  default: async () => {},
+};
 
 // Namespace imports work
-import * as permissions from 'permissions'
+import * as permissions from "permissions";
 export const actions = {
   default: async () => {
-    permissions.hasPermission()
-  }
-}
+    permissions.hasPermission();
+  },
+};
 ```
 
 #### Invalid ✗
@@ -234,15 +248,19 @@ export const actions = {
 // Missing enforced call
 export const actions = {
   default: async (event) => {
-    console.log('missing hasPermission')
-  }
-}
+    console.log("missing hasPermission");
+  },
+};
 
 // One function missing enforced call (each is checked independently)
 export const actions = {
-  create: async () => { hasPermission() },  // OK
-  update: async () => { console.log('bad') }  // Error
-}
+  create: async () => {
+    hasPermission();
+  }, // OK
+  update: async () => {
+    console.log("bad");
+  }, // Error
+};
 ```
 
 ### Multiple Rule Instances
@@ -253,48 +271,65 @@ You can configure multiple instances of the rule for different requirements:
 export default [
   {
     plugins: {
-      'enforce-call': enforceCall
+      "enforce-call": enforceCall,
     },
     rules: {
       // Basic queries need at least one auth check
-      'enforce-call/require-call-in-context': ['error', {
-        check: ['query', 'query.batch'],
-        enforce: ['hasPermission', 'isAuthenticated'],
-        requireAll: false
-      }]
-    }
+      "enforce-call/require-call-in-context": [
+        "error",
+        {
+          check: ["query", "query.batch"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: false,
+        },
+      ],
+    },
   },
   {
-    files: ['src/admin/**/*.js'],
+    files: ["src/admin/**/*.js"],
     rules: {
       // Admin commands need both checks
-      'enforce-call/require-call-in-context': ['error', {
-        check: ['adminCommand'],
-        enforce: ['hasPermission', 'isAuthenticated'],
-        requireAll: true
-      }]
-    }
-  }
-]
+      "enforce-call/require-call-in-context": [
+        "error",
+        {
+          check: ["adminCommand"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: true,
+        },
+      ],
+    },
+  },
+];
 ```
 
 ## Behavior
 
 ### What Gets Checked
+
 - Callback arguments (arrow functions and function expressions) passed to functions in `check`
 - Exported functions with names matching `checkFunctions`
 - All function properties within exported objects matching `checkFunctions`
 - Member expressions like `query.batch` are treated as distinct from `query`
 
 ### What Counts as Valid
+
 - Non-empty callbacks/functions that contain at least one direct call to an enforced function (when `requireAll: false`)
+- Non-empty callbacks/functions whose first executable statement calls an enforced function (when `requireFirst: true`)
 - Non-empty callbacks/functions that contain direct calls to all enforced functions (when `requireAll: true`)
 - Empty callbacks/functions (no code = no violation)
 - Namespace import calls like `permissions.hasPermission()` satisfy an `enforce: ["hasPermission"]` requirement
 
 ### What Gets Reported
+
 - Non-empty callbacks/functions without the required enforced function calls
 - Only direct calls within the callback/function body count (not nested in helper functions)
+
+Intentional public endpoints can opt out with a targeted disable rather than weakening the rule globally:
+
+```javascript
+// eslint-disable-next-line enforce-call/require-call-in-context -- Public health check
+export const load = () => getHealthStatus();
+```
 
 ## License
 

@@ -606,6 +606,167 @@ ruleTester.run("require-call-in-context", rule, {
   ],
 });
 
+const requireFirstTester = new RuleTester({
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: "module",
+  },
+});
+
+requireFirstTester.run("require-call-in-context (requireFirst)", rule, {
+  valid: [
+    {
+      code: "query(() => { hasPermission(); doWork(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: "query(async () => { await hasPermission(); doWork(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: "query(() => permissions.hasPermission())",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: "query(() => { isAuthenticated(); doWork(); hasPermission(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: true,
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: 'query(() => { "use strict"; ; hasPermission(); doWork(); })',
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: "query(() => {})",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+    {
+      code: "query(() => { doWork(); hasPermission(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: false,
+        },
+      ],
+    },
+    {
+      code: "export const load = () => { hasPermission(); doWork(); }",
+      options: [
+        {
+          checkFunctions: ["load"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+    },
+  ],
+  invalid: [
+    {
+      code: "query(() => { doWork(); hasPermission(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingFirst",
+          data: { functions: "hasPermission" },
+        },
+      ],
+    },
+    {
+      code: "query(() => { doWork(); hasPermission(); isAuthenticated(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: true,
+          requireFirst: true,
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingFirst",
+          data: { functions: "hasPermission, isAuthenticated" },
+        },
+      ],
+    },
+    {
+      code: "query(() => { hasPermission(); doWork(); })",
+      options: [
+        {
+          check: ["query"],
+          enforce: ["hasPermission", "isAuthenticated"],
+          requireAll: true,
+          requireFirst: true,
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingAll",
+          data: { functions: "hasPermission, isAuthenticated" },
+        },
+      ],
+    },
+    {
+      code: "export function load() { doWork(); hasPermission(); }",
+      options: [
+        {
+          checkFunctions: ["load"],
+          enforce: ["hasPermission"],
+          requireFirst: true,
+        },
+      ],
+      errors: [
+        {
+          messageId: "missingFirst",
+          data: { functions: "hasPermission" },
+        },
+      ],
+    },
+  ],
+});
+
 // Tests for namespace imports (import * as)
 const namespaceImportTester = new RuleTester({
   languageOptions: {
