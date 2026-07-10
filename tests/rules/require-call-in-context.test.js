@@ -606,6 +606,147 @@ ruleTester.run("require-call-in-context", rule, {
   ],
 });
 
+// Performance tests
+import { Linter } from "eslint";
+
+const performanceTester = {
+  run(name, tests) {
+    console.log(`\nPerformance: ${name}`);
+    for (const test of tests) {
+      const linter = new Linter({ configType: "flat" });
+
+      const config = [
+        {
+          plugins: {
+            test: { rules: { "require-call-in-context": rule } },
+          },
+          rules: {
+            "test/require-call-in-context": ["warn", test.options],
+          },
+          languageOptions: {
+            ecmaVersion: 2024,
+            sourceType: "module",
+          },
+        },
+      ];
+
+      // Warmup
+      linter.verify(test.code, config);
+
+      // Measure
+      const iterations = test.iterations || 1000;
+      const start = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        linter.verify(test.code, config);
+      }
+      const elapsed = performance.now() - start;
+      const perIteration = elapsed / iterations;
+
+      console.log(
+        `  ${test.name}: ${perIteration.toFixed(3)}ms/iter (${iterations} iterations)`,
+      );
+
+      if (test.maxMs && perIteration > test.maxMs) {
+        throw new Error(
+          `Performance regression: ${test.name} took ${perIteration.toFixed(3)}ms, max allowed ${test.maxMs}ms`,
+        );
+      }
+    }
+  },
+};
+
+// Generate deeply nested code for stress testing
+function generateDeeplyNestedCode(depth) {
+  let code = "query(() => {\n";
+  for (let i = 0; i < depth; i++) {
+    code += "  ".repeat(i + 1) + "try {\n";
+  }
+  code += "  ".repeat(depth + 1) + "hasPermission();\n";
+  for (let i = depth - 1; i >= 0; i--) {
+    code += "  ".repeat(i + 1) + "} catch (e) {}\n";
+  }
+  code += "});";
+  return code;
+}
+
+// Generate code with many callbacks
+function generateManyCallbacks(count) {
+  const callbacks = [];
+  for (let i = 0; i < count; i++) {
+    callbacks.push(`() => { hasPermission() }`);
+  }
+  return `query(${callbacks.join(", ")});`;
+}
+
+// Generate code with many statements
+function generateManyStatements(count) {
+  const statements = [];
+  for (let i = 0; i < count; i++) {
+    statements.push(`  const x${i} = someCall${i}();`);
+  }
+  statements.push("  hasPermission();");
+  return `query(() => {\n${statements.join("\n")}\n});`;
+}
+
+performanceTester.run("require-call-in-context", [
+  {
+    name: "simple callback",
+    code: "query(() => { hasPermission() })",
+    options: { check: ["query"], enforce: ["hasPermission"] },
+    iterations: 5000,
+    maxMs: 1,
+  },
+  {
+    name: "deeply nested (10 levels)",
+    code: generateDeeplyNestedCode(10),
+    options: { check: ["query"], enforce: ["hasPermission"] },
+    iterations: 1000,
+    maxMs: 2,
+  },
+  {
+    name: "deeply nested (50 levels)",
+    code: generateDeeplyNestedCode(50),
+    options: { check: ["query"], enforce: ["hasPermission"] },
+    iterations: 500,
+    maxMs: 5,
+  },
+  {
+    name: "many callbacks (20)",
+    code: generateManyCallbacks(20),
+    options: { check: ["query"], enforce: ["hasPermission"] },
+    iterations: 1000,
+    maxMs: 2,
+  },
+  {
+    name: "many statements (100)",
+    code: generateManyStatements(100),
+    options: { check: ["query"], enforce: ["hasPermission"] },
+    iterations: 500,
+    maxMs: 3,
+  },
+  {
+    name: "exported function with nested blocks",
+    code: `
+      export const load = async () => {
+        try {
+          if (condition) {
+            for (const item of items) {
+              while (processing) {
+                await hasPermission();
+              }
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    `,
+    options: { checkFunctions: ["load"], enforce: ["hasPermission"] },
+    iterations: 1000,
+    maxMs: 2,
+  },
+]);
+
 // Tests for namespace imports (import * as)
 const namespaceImportTester = new RuleTester({
   languageOptions: {
