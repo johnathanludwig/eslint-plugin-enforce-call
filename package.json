@@ -1,18 +1,24 @@
 {
   "name": "eslint-plugin-enforce-call",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "ESLint plugin to enforce function calls within specific function contexts",
-  "license": "MIT",
-  "publisher": "johnathanludwig",
-  "author": "Johnathan Ludwig <john@johnathan.dev> (https://johnathan.dev)",
+  "keywords": [
+    "enforce-call",
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin"
+  ],
   "homepage": "https://github.com/johnathanludwig/eslint-plugin-enforce-call#readme",
+  "bugs": {
+    "url": "https://github.com/johnathanludwig/eslint-plugin-enforce-call/issues"
+  },
+  "license": "MIT",
+  "author": "Johnathan Ludwig <john@johnathan.dev> (https://johnathan.dev)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/johnathanludwig/eslint-plugin-enforce-call.git"
   },
-  "bugs": {
-    "url": "https://github.com/johnathanludwig/eslint-plugin-enforce-call/issues"
-  },
+  "publisher": "johnathanludwig",
   "directories": {
     "lib": "lib",
     "test": "tests"
@@ -25,12 +31,6 @@
   "scripts": {
     "test": "node tests/rules/require-call-in-context.test.js"
   },
-  "keywords": [
-    "eslint",
-    "eslintplugin",
-    "eslint-plugin",
-    "enforce-call"
-  ],
   "devDependencies": {
     "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^9.0.0",
