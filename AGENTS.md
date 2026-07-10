@@ -20,15 +20,16 @@ Do not use npm or yarn commands unless the user explicitly requests them.
 
 ## Validation
 
-After changing rule code or tests, run:
+After changing code, run the quality checks in this order:
 
 ```sh
 pnpm test
+pnpx fallow --format json
 ```
 
-The current test script directly runs `tests/rules/require-call-in-context.test.js` with Node.js. Do not claim tests pass unless this command completes successfully.
+Run tests first for fast behavioral feedback, then run Fallow as the final structural quality gate. AI agents must use `--format json` so Fallow returns structured output. The current test script directly runs `tests/rules/require-call-in-context.test.js` with Node.js. Do not claim validation passes unless both commands complete successfully.
 
-When resolving merge conflicts, remove every `<<<<<<<`, `=======`, and `>>>>>>>` marker, preserve compatible coverage from both sides, and then run `pnpm test`.
+When resolving merge conflicts, remove every `<<<<<<<`, `=======`, and `>>>>>>>` marker, preserve compatible coverage from both sides, and then run both quality checks.
 
 ## Code conventions
 
